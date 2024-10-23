@@ -1,0 +1,36 @@
+
+Die API hat folgende Schnittstellen:
+URL: /api/log
+
+limit           Type: INT       Default: 10             Beschränkt die Anzahl der Datensätze
+offset          Type: INT       Default: 10             Verschiebt das Datenfenster (sinnvoll mit limit)
+sensorType      Type: String    Default: None / NULL    Gibt an welcher Sensordaten (useless)
+
+Aufruf:
+GET http://localhost:8080/api/log?limit=10&offset=5&sensorType='water'
+
+Return:
+{
+  "data": [
+    {
+      "timestamp": "2024-01-20 19:33:45",
+      "statuscode": 202,
+      "sensor_type": "water"
+    },
+    {
+      "timestamp": "2024-01-20 19:33:45",
+      "statuscode": 202,
+      "sensor_type": "water"
+    },
+    {
+      "timestamp": "2024-01-20 19:33:45",
+      "statuscode": 202,
+      "sensor_type": "water"
+    },...
+  ]
+}, 200 ==> OK
+
+Return:
+{
+  "error": "couldn't fetch logs from database"
+}, 400 ==> Datenbankverbindung fehlgeschlagen!

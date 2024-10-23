@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{url_for('static', filename='sensors_ranges.js')}}"></script>
+
+    <title>SimplePlant</title>
+    <style>
+        .carousel-indicators{
+            position: absolute;
+            bottom: -28px;
+        }
+    </style>
+
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <img src="../static/pictures/logo-removebg-preview.png" height="50px" alt="">
+          <a class="navbar-brand" href="#">SimplePlant</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/configs">History</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/log">Log</a>
+              </li>
+              <li class="nav-item">
+                <a href="/login" class="nav-link">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+</header>
+
+<main>
+    <div class="container-fluid p-3">
+        <div class="row">
+            <!-- Live View -->
+            <div class="col-md-12 col-lg-4 mb-2" style="min-width: 300px;">
+                <div class="card shadow bg-dark text-white">
+                    <div id="live-view"></div>
+                    <div class="card-body">
+                        <div style="min-height: 204px;">
+                            <h3>Analysis</h3>  
+                            <p class="card-text mb-5" id="analysis-result"></p>
+                        </div>
+                        <div style="min-height: 204px;">
+                            <h3>Recommendation</h3>  
+                            <p class="card-text mb-5" id="analysis-recommendation"></p>
+                        </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-12 col-lg-8 fs-5">
+                <div class="row mb-3">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <!-- LED Actuator -->
+                        <div class="col-lg-6 col-md-6 pe-3" id="led">
+                            <div class="card bg-dark shadow text-white" style="min-width: 150px;">
+                                <div class="card-block p-3 d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-middle">
+                                        <label for="ledSwitch" class="me-2">LED</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="ledSwitch" name="ledSwitch" onchange="toggleLed()"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 pe-3" id="autoreload">
+                            <div class="card bg-dark shadow text-white" style="min-width: 150px;">
+                                <div class="card-block p-3 d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-middle">
+                                        <label for="autoReloadSwitch" class="me-2">Auto Reload</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="autoReloadSwitch" name="autoReloadSwitch" onchange="toggleAutoReload(event)" checked/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-0">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <!-- LED Actuator -->
+                        <div class="col-lg-12 col-md-12 pe-3" id="led">
+                            <div class="card bg-dark shadow text-white">
+                                <div class="card-header d-flex justify-content-between">
+                                    <h3>Templates</h3>
+                                    <!-- Buttons for template logic -->
+                                    <div class="template-btns">
+                                        <div class="preset-options d-flex ">
+                                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#add-template-modal">Create Template</button>
+                                            <button class="btn btn-light mx-2" data-bs-toggle="modal" data-bs-target="#delete-template-modal" onclick="loadModalCheckboxes()">Delete Templates</button>
+                                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#set-active-template-modal" onclick="loadModalToggles()">Set active template</button>
+                                        </div>    
+                                    </div>
+                                </div>
+
+                                <div class="card-block p-2">
+                                    <div class="d-flex flex-column">
+                                        <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
+                                            <div class="carousel-indicators mb-0" id="carousel-indicators">
+                                                
+                                            </div>
+                                            <div class="carousel-inner" id="carousel-inner">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row my-0 d-flex align-items-center justify-content-between">
+                    <div class="col-11 d-flex align-items-baseline flex-row">
+                        <h3 class="me-3 mb-0">Sensors</h3>
+                        <p class="text-white text-muted mb-0" id="sensor-refresh">Auto-reload enabled.</p>
+                    </div>
+                    <div class="col-1 m-0 p-0">
+                        <button class="btn fs-3" onclick="refreshAllSensors()">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Sensor Cards-->
+                <div class="row mb-3 fs-5">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <!-- Upper Sensors -->
+                        <div class="col-sm-12 col-md-6 col-lg-6 pe-3">
+                            <div class="card bg-dark shadow text-white mb-3">
+                                <div class="card-block p-3 py-2">
+                                    <div class="sensor-info" id="ph">
+                                        <div class="card-title">
+                                            <h3 class="sensor-name fw-bold">pH</h3>
+                                        </div>
+                                        <div class="card-text text-center d-flex justify-content-left">
+                                            <div class="sensor-status" id="ph-value"></div>
+                                            <div class="sensor-unit">&nbsp;pH</div>
+                                        </div>
+                                        <div class="card-footer text-secondary px-0" id="ph-timestamp"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-sm-12 col-md-6 col-lg-6 pe-3">
+                            <div class="card bg-dark shadow text-white mb-3">
+                                <div class="card-block p-3 py-2">
+                                    <div class="sensor-info" id="ec">
+                                        <div class="card-title">
+                                            <h3 class="sensor-name fw-bold">EC</h3>
+                                        </div>
+                                        <div class="card-text text-center d-flex justify-content-left">
+                                            <div class="sensor-status" id="ec-value"></div>
+                                            <div class="sensor-unit">&nbsp;mS/cm</div>
+                                        </div>
+                                        <div class="card-footer text-secondary px-0" id="ec-timestamp"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-sm-12 col-md-6 col-lg-6 pe-3">
+                            <div class="card bg-dark shadow text-white mb-3">
+                                <div class="card-block p-3 py-2">
+                                    <div class="sensor-info" id="waterlevel">
+                                        <div class="card-title">
+                                            <h3 class="sensor-name fw-bold">Waterlevel</h3>
+                                        </div>
+                                        <div class="card-text text-center d-flex justify-content-left">
+                                            <div class="sensor-status" id="waterlevel-value"></div>
+                                        </div>
+                                        <div class="card-footer text-secondary px-0" id="waterlevel-timestamp"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="col-sm-12 col-md-6 col-lg-6 pe-3">
+                            <div class="card bg-dark shadow text-white mb-3">
+                                <div class="card-block p-3 py-2">
+                                    <div class="sensor-info" id="temperature">
+                                        <div class="card-title">
+                                            <h3 class="sensor-name fw-bold">Temperature</h3>
+                                        </div>
+                                        <div class="card-text text-center d-flex justify-content-left">
+                                            <div class="sensor-status" id="temperature-value"></div>
+                                            <div class="sensor-unit">&nbsp;&deg;C</div>
+                                        </div>
+                                        <div class="card-footer text-secondary px-0" id="temperature-timestamp"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12 col-md-6 col-lg-6 pe-3">
+                            <div class="card bg-dark shadow text-white mb-3">
+                                <div class="card-block p-3 py-2">
+                                    <div class="sensor-info" id="humidity">
+                                        <div class="card-title">
+                                            <h3 class="sensor-name fw-bold">Humidity</h3>
+                                        </div>
+                                        <div class="card-text text-center d-flex justify-content-left">
+                                            <div class="sensor-status" id="humidity-value"></div>
+                                            <div class="sensor-unit">&nbsp;%</div>
+                                        </div>
+                                        <div class="card-footer text-secondary px-0" id="humidity-timestamp"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="col-sm-12 col-md-6 col-lg-6 pe-3">
+                            <div class="card bg-dark shadow text-white mb-3">
+                                <div class="card-block p-3 py-2">
+                                    <div class="sensor-info" id="light">
+                                        <div class="card-title">
+                                            <h3 class="sensor-name fw-bold">Light</h3>
+                                        </div>
+                                        <div class="card-text text-center d-flex justify-content-left">
+                                            <div class="sensor-status" id="light-value"></div>
+                                            <div class="sensor-unit">&nbsp;Lux</div>
+                                        </div>
+                                        <div class="card-footer text-secondary px-0" id="light-timestamp"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>  
+    </div>
+    <!-- Create Template Modal -->
+    <div class="modal fade" id="add-template-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Create Template</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              </button>
+            </div>
+            <div class="modal-body">
+                <form action="/add_template" method="post" id="template-form">
+                    <div class="d-flex align-items-center">
+                        <h5 class="h5 me-3" id="ph-form-value">pH-Range:</h5>
+                        <input type="number" class="form-control" name="ph-form-min" id="ph-form-input" style="max-width: 100px;" value="6.5">
+                        <p class="mx-2">-</p>
+                        <input type="number" class="form-control" name="ph-form-max" id="ph-form-input" style="max-width: 100px;" value="7.5">
+                    </div>
+                    <div class="d-flex align-items-center my-3">
+                        <h5 class="h5 me-3" id="ec-form-value">EC-Range:</h5>
+                        <input type="number" class="form-control" name="ec-form-min" id="ec-form-input" style="max-width: 100px;" value="0.5">
+                        <p class="mx-2">-</p>
+                        <input type="number" class="form-control" name="ec-form-max" id="ec-form-input" style="max-width: 100px;" value="1.5">
+                    </div>
+                    <div class="d-flex align-items-center my-3">
+                        <h5 class="h5 me-3" id="temperature-form-value">Temperature-range:</h5>
+                        <input type="number" class="form-control" name="temperature-form-min" id="temperature-form-input" style="max-width: 100px;" value="18">
+                        <p class="mx-2">-</p>
+                        <input type="number" class="form-control" name="temperature-form-max" id="temperature-form-input" style="max-width: 100px;" value="22">
+                    </div>
+                    <div class="d-flex align-items-center my-3">
+                        <h5 class="h5 me-3" id="humidity-form-value">Humidity-Range:</h5>
+                        <input type="number" class="form-control" name="humidity-form-min" id="humidity-form-input" style="max-width: 100px;" value="40">
+                        <p class="mx-2">-</p>
+                        <input type="number" class="form-control" name="humidity-form-max" id="humidity-form-input" style="max-width: 100px;" value="80">
+                    </div>
+                    <div class="d-flex align-items-center my-3">
+                        <h5 class="h5 me-3" id="light-form-value">Light-Range:</h5>
+                        <input type="time" class="form-control" name="light-form-min" id="light-form-input" style="max-width: 100px;" value="08:00">
+                        <p class="mx-2">-</p>
+                        <input type="time" class="form-control" name="light-form-max" id="light-form-input" style="max-width: 100px;" value="20:00">
+                    </div>
+                    <div class="d-flex align-items-center my-3">
+                        <h5 class="h5 me-3 text-nowrap" id="light-form-value">Template-Name:</h5>
+                        <input type="text" class="form-control" name="templatename-form" id="templatename-form">
+                    </div>
+                </form>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" onclick="submitForm()">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+        <!-- Delete Template Modal -->
+    <div class="modal fade" id="delete-template-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Delete Templates</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="killModalForms()"> 
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/delete_templates" method="post" id="template-delete-form">
+                        <!-- ... (your form content) ... -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="killModalForms()">Close</button>
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" onclick="submitDeleteForm(); killModalForms();">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="set-active-template-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Set active template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/activate_template" method="post" id="template-activation-form">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="killModalForms()">Close</button>
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" onclick="submitActivationForm();">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script src="{{url_for('static', filename='sensors.js')}}"></script>
+<script src="{{url_for('static', filename='actuators.js')}}"></script>
+<script>
+
+    function submitForm() {
+        document.getElementById('template-form').submit();
+        displayTemplatesInCarousel();
+        killModalForms();
+    }
+
+    function submitDeleteForm(){
+        document.getElementById('template-delete-form').submit();
+        displayTemplatesInCarousel();
+        killModalForms();
+    }
+
+    function submitActivationForm(){
+        document.getElementById('template-activation-form').submit();
+        displayTemplatesInCarousel();
+        killModalForms();
+    }
+
+    $('#template-activation-form').on('hidden.bs.modal', killModalForms);
+    $('#template-delete-form').on('hidden.bs.modal', killModalForms);
+    
+    function killModalForms(){
+        const activationForm = document.getElementById('template-activation-form');
+        const deletionForm = document.getElementById('template-delete-form');
+        activationForm.innerHTML = ""
+        deletionForm.innerHTML = ""
+    }
+    function getImage() {
+        fetch('/get_image_path')
+            .then(response => response.json())
+            .then(data => {
+                const liveView = document.getElementById('live-view');
+                liveView.innerHTML = '<img class=""card-img-top" src="' + data.image_path + '" alt="leaf" style="width: 100%; min-height: 200px; height: 18vw; object-fit: cover;">';
+            });
+    }
+
+    getImage()
+    setInterval(getImage, 900000)
+    
+
+ 
+    // setInterval(getChart, 5000)
+
+</script>
+
+</body>
+</html>
+

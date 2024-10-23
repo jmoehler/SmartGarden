@@ -1,4 +1,0 @@
-This piece of code loads the tomato picture into 3 models and based on their outputs conclusions on the overall plant healthiness are delivered. For now the pictures are accesed through the path to "pics" folder, which contains pre-downloaded tomato leaves's pictures . In further iterarions of this code this path will be replaced with one to the folder that contains pictures taken real-time with yet-to-be-set-up RaspCam. For now if the user wants to analyse some other picture from the "pics" folder, they will need to manually replace the "image_path" variable with the desired picture name.
-TODO:take care of the case when the second model recognises the plant as something other than tomato;
-take care of the TypeError: string indices must be integers, not 'str' exception;
-take care of the path to RaspCam picture folder

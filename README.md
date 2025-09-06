@@ -5,7 +5,7 @@ For the installation guide please refer to the [installation guide](./INSTALLATI
 
 # SmartGarden System
 
-- [About SmartGarden 💡](#about-smartgarden)
+- [About SmartGarden](#about-smartgarden)
 - [Project Guidelines and Collaboration](#project-guidelines-and-collaboration)
     - [Getting Started](#getting-started)
     - [Contributing](#contributing)
@@ -22,7 +22,7 @@ For the installation guide please refer to the [installation guide](./INSTALLATI
 
 ## About SmartGarden
 
-SmartGarden was conceived, designed, and implemented as part of the
+SmartGarden was conceived, designed, and implemented in a team effort as part of the
 [Programmierpraktikum: Cyber-Physical Systems](https://moseskonto.tu-berlin.de/moses/modultransfersystem/bolognamodule/beschreibung/anzeigen.html?nummer=40277&version=5) Bachelor’s course at Tu Berlin.
 
 The SmartGarden system is an autonomous indoor gardening solution designed to provide users with a convenient and efficient way to manage their indoor plants. This project combines hardware and software components, including a webserver, a central hub, a database, sensors, actuators, and a picture analysis module.
